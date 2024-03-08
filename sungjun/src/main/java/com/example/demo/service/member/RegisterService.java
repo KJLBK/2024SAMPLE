@@ -1,7 +1,7 @@
-package demo.service.member;
+package com.example.demo.service.member;
 
-import demo.entity.member.Member;
-import demo.entity.member.RegisterDto;
+import com.example.demo.entity.member.Member;
+import com.example.demo.entity.member.RegisterDto;
 import org.springframework.stereotype.Service;
 
 @Service

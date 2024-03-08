@@ -1,4 +1,4 @@
-package demo.exception;
+package com.example.demo.exception;
 
 public class PasswordTooShortException extends RuntimeException {
 
