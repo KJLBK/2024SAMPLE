@@ -1,6 +1,6 @@
-package demo.repository;
+package demo.repository.member;
 
-import demo.entity.Member;
+import demo.entity.member.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
