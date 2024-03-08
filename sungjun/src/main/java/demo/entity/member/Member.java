@@ -4,10 +4,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
+import lombok.Builder;
 
 import java.time.LocalDateTime;
 
 @Entity
+@Builder
 public class Member {
 
 	@Id
@@ -23,4 +25,17 @@ public class Member {
 	private String phone;
 
 	private LocalDateTime joinDateTime;
+
+	public static Member from(RegisterDto registerDto) {
+		Member member = Member.builder()
+				.id(registerDto.getId())
+				.pw(registerDto.getPw())
+				.name(registerDto.getName())
+				.phone(registerDto.getPhone())
+				.role(Role.USER)
+				.joinDateTime(LocalDateTime.now())
+				.build();
+
+		return member;
+	}
 }
