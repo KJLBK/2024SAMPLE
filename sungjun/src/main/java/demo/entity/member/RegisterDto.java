@@ -12,4 +12,5 @@ public class RegisterDto {
 	private String name;
 
 	private String phone;
+
 }
