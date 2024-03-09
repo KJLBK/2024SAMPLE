@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Optional;
@@ -17,7 +18,11 @@ public class MemberController {
     private MemberService memberService;
     // 회원가입
     @GetMapping("/members/createMember")
-    public String signUp(Member member, Model model){
+    public String showSignupForm(){
+        return "/members/signup";
+    }
+    @PostMapping("/members/createMember")
+    public String signup(Member member, Model model){
         Member user = member;
         Optional<String> sucess = memberService.join(user);
         if(sucess.isPresent()) return "redirect:/";

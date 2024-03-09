@@ -11,10 +11,6 @@ import java.util.Optional;
 public class MemberService {
     private JpaMemberRepository memberRepository;
     // 회원 가입
-    @GetMapping("members/reateMember")
-    public String showSignupForm(){
-        return "members/signup";
-    }
     public Optional<String> join(Member member){
         duplicationMember(member);
         memberRepository.save(member);
@@ -28,5 +24,12 @@ public class MemberService {
                 });
     }
     // 로그인
-
+    public boolean login(String email, String password){
+        Optional<Member> loginCheck = memberRepository.findById(email);
+        if(loginCheck.isPresent()){
+            Member member = loginCheck.get();
+            if(member.getMemberPasswrod().equals(password)) return true;
+        }
+        return false;
+    }
 }
