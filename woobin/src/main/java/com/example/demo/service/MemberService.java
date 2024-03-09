@@ -3,6 +3,7 @@ package com.example.demo.service;
 import com.example.demo.entity.Member;
 import com.example.demo.repository.JpaMemberRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.Optional;
 
@@ -10,6 +11,10 @@ import java.util.Optional;
 public class MemberService {
     private JpaMemberRepository memberRepository;
     // 회원 가입
+    @GetMapping("members/reateMember")
+    public String showSignupForm(){
+        return "members/signup";
+    }
     public Optional<String> join(Member member){
         duplicationMember(member);
         memberRepository.save(member);
