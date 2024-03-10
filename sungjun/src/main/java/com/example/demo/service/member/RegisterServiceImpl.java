@@ -2,11 +2,8 @@ package com.example.demo.service.member;
 
 import com.example.demo.entity.member.Member;
 import com.example.demo.entity.member.RegisterDto;
-import com.example.demo.exception.AlreadyUsedIdException;
 import com.example.demo.exception.ErrorCode;
 import com.example.demo.exception.MemberException;
-import com.example.demo.exception.PasswordTooLongException;
-import com.example.demo.exception.PasswordTooShortException;
 import com.example.demo.repository.member.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
