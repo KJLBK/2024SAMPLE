@@ -3,6 +3,8 @@ package com.example.demo.service.member;
 import com.example.demo.entity.member.Member;
 import com.example.demo.entity.member.RegisterDto;
 import com.example.demo.exception.AlreadyUsedIdException;
+import com.example.demo.exception.ErrorCode;
+import com.example.demo.exception.MemberException;
 import com.example.demo.exception.PasswordTooLongException;
 import com.example.demo.exception.PasswordTooShortException;
 import com.example.demo.repository.member.MemberRepository;
@@ -18,32 +20,31 @@ public class RegisterServiceImpl implements RegisterService {
 	private final MemberRepository memberRepository;
 
 	@Override
-	public Member join(RegisterDto registerDTO) {
-		validateId(registerDTO.getId());
-		validatePassword(registerDTO.getPw());
+	public Member join(RegisterDto registerDto) {
+		validateId(registerDto.getId());
+		validatePassword(registerDto.getPw());
 
-		Member member = Member.from(registerDTO);
-
+		Member member = Member.from(registerDto);
 		return memberRepository.save(member);
 	}
 
-	private boolean validateId(String id) {
+	private void validateId(String id) {
 		Optional<Member> member = memberRepository.findById(id);
-		if (member.isEmpty()) {
-			throw new AlreadyUsedIdException("이미 사용중인 아이디입니다.");
-		}
 
-		return false;
+		if (member.isPresent()) {
+			throw new MemberException(ErrorCode.ALREADY_USED_ID_EXCEPTION);
+		}
 	}
 
 	private void validatePassword(String password) {
 		int passwordLength = password.length();
+
 		if (passwordLength < 8) {
-			throw new PasswordTooShortException("비밀번호가 8자보다 적습니다.");
+			throw new MemberException(ErrorCode.PASSWORD_TOO_SHORT_EXCEPTION);
 		}
 
 		if (passwordLength > 16) {
-			throw new PasswordTooLongException("비밀번호가 16자를 초과합니다.");
+			throw new MemberException(ErrorCode.PASSWORD_TOO_LONG_EXCEPTION);
 		}
 	}
 
