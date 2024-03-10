@@ -31,4 +31,13 @@ public class MemberController {
             return "/members/createMember";
         }
     }
+    @PostMapping("/members/loginMember")
+    public String login(Member member, Model model){
+        Optional<Member> sucess = memberService.login(member.getMemberEmail(), member.getMemberPasswrod());
+        if(sucess.isPresent()) return "redirect:/";
+        else {
+            model.addAttribute("error", "로그인에 실패하였습니다.");
+            return "/members/loginMember";
+        }
+    }
 }

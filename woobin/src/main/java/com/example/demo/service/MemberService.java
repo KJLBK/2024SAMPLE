@@ -24,12 +24,12 @@ public class MemberService {
                 });
     }
     // 로그인
-    public boolean login(String email, String password){
+    public Optional<Member> login(String email, String password){
         Optional<Member> loginCheck = memberRepository.findById(email);
         if(loginCheck.isPresent()){
             Member member = loginCheck.get();
-            if(member.getMemberPasswrod().equals(password)) return true;
+            if(member.getMemberPasswrod().equals(password)) return Optional.of(member);
         }
-        return false;
+        return Optional.empty();
     }
 }
