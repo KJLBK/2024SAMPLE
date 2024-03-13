@@ -5,10 +5,7 @@ import com.example.demo.service.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
@@ -22,21 +19,18 @@ public class MemberController {
         return "/members/signup";
     }
     @PostMapping("/members/createMember")
-    public String signup(Member member, Model model){
-        Member user = member;
-        Optional<String> sucess = memberService.join(user);
+    public String signup(@RequestBody Member member){
+        Optional<String> sucess = memberService.join(member);
         if(sucess.isPresent()) return "redirect:/";
         else {
-            model.addAttribute("error", "회원가입에 실패하였습니다.");
             return "/members/createMember";
         }
     }
     @PostMapping("/members/loginMember")
-    public String login(Member member, Model model){
-        Optional<Member> sucess = memberService.login(member.getMemberEmail(), member.getMemberPasswrod());
+    public String login(@RequestBody Member member){
+        Optional<String> sucess = memberService.login(member.getMemberEmail(), member.getMemberPassword());
         if(sucess.isPresent()) return "redirect:/";
         else {
-            model.addAttribute("error", "로그인에 실패하였습니다.");
             return "/members/loginMember";
         }
     }
