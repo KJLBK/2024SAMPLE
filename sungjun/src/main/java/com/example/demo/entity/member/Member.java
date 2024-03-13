@@ -4,12 +4,18 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Member {
 
 	@Id
@@ -18,6 +24,7 @@ public class Member {
 	private String pw;
 
 	@Enumerated(EnumType.STRING)
+	@ColumnDefault("'USER'")
 	private Role role;
 
 	private String name;
@@ -27,16 +34,14 @@ public class Member {
 	private LocalDateTime joinDateTime;
 
 	public static Member from(RegisterDto registerDto) {
-		Member member = Member.builder()
+		return Member.builder()
 				.id(registerDto.getId())
-				.pw(registerDto.getPw())
+				.pw(new BCryptPasswordEncoder().encode(registerDto.getPw()))
 				.name(registerDto.getName())
 				.phone(registerDto.getPhone())
 				.role(Role.USER)
 				.joinDateTime(LocalDateTime.now())
 				.build();
-
-		return member;
 	}
 
 }
