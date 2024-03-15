@@ -8,15 +8,22 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 @Entity
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Member {
+public class Member implements UserDetails {
 
 	@Id
 	private String id;
@@ -34,9 +41,11 @@ public class Member {
 	private LocalDateTime joinDateTime;
 
 	public static Member from(RegisterDto registerDto) {
+		PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
 		return Member.builder()
 				.id(registerDto.getId())
-				.pw(new BCryptPasswordEncoder().encode(registerDto.getPw()))
+				.pw(passwordEncoder.encode(registerDto.getPw()))
 				.name(registerDto.getName())
 				.phone(registerDto.getPhone())
 				.role(Role.USER)
@@ -44,4 +53,41 @@ public class Member {
 				.build();
 	}
 
+	@Override
+	public Collection<? extends GrantedAuthority> getAuthorities() {
+		return Arrays.asList(this.role.toString())
+				.stream()
+				.map(SimpleGrantedAuthority::new)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public String getPassword() {
+		return null;
+	}
+
+	@Override
+	public String getUsername() {
+		return null;
+	}
+
+	@Override
+	public boolean isAccountNonExpired() {
+		return false;
+	}
+
+	@Override
+	public boolean isAccountNonLocked() {
+		return false;
+	}
+
+	@Override
+	public boolean isCredentialsNonExpired() {
+		return false;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return false;
+	}
 }
