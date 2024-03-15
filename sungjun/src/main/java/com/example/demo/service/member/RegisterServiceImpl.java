@@ -1,6 +1,7 @@
 package com.example.demo.service.member;
 
 import com.example.demo.entity.member.Member;
+import com.example.demo.entity.member.MemberMapper;
 import com.example.demo.entity.member.RegisterDto;
 import com.example.demo.exception.ErrorCode;
 import com.example.demo.exception.MemberException;
@@ -21,7 +22,7 @@ public class RegisterServiceImpl implements RegisterService {
 		validateId(registerDto.getId());
 		validatePassword(registerDto.getPw());
 
-		Member member = Member.from(registerDto);
+		Member member = MemberMapper.toEntity(registerDto);
 		return memberRepository.save(member);
 	}
 
