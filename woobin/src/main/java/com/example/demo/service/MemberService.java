@@ -17,8 +17,15 @@ public class MemberService {
     // 회원 가입
     public Optional<String> join(Member member){
         duplicationMember(member);
+        passwordLimit(member.getMemberPassword());
         memberRepository.save(member);
         return Optional.ofNullable(member.getMemberEmail());
+    }
+    // 비밀 번호 길이 제한
+    private void passwordLimit(String password){
+        if(password.length() > 15){
+            throw new IllegalStateException("비밀번호 길이가 잘못되었습니다.");
+        }
     }
     // 중복 체크
     private void duplicationMember(Member member){
