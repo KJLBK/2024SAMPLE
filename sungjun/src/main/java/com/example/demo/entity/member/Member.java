@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
@@ -21,7 +22,7 @@ import java.util.stream.Collectors;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Member implements UserDetails {
+public class Member {
 
 	@Id
 	private String id;
@@ -38,41 +39,17 @@ public class Member implements UserDetails {
 
 	private LocalDateTime joinDateTime;
 
-	@Override
-	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return Arrays.asList(this.role.toString())
+	public UserDetails getUserDetails() {
+		Collection<? extends GrantedAuthority> auth = Arrays.asList(this.role.toString())
 				.stream()
 				.map(SimpleGrantedAuthority::new)
 				.collect(Collectors.toList());
+
+		return User.builder()
+				.username(this.id)
+				.password(this.pw)
+				.authorities(auth)
+				.build();
 	}
 
-	@Override
-	public String getPassword() {
-		return null;
-	}
-
-	@Override
-	public String getUsername() {
-		return null;
-	}
-
-	@Override
-	public boolean isAccountNonExpired() {
-		return false;
-	}
-
-	@Override
-	public boolean isAccountNonLocked() {
-		return false;
-	}
-
-	@Override
-	public boolean isCredentialsNonExpired() {
-		return false;
-	}
-
-	@Override
-	public boolean isEnabled() {
-		return false;
-	}
 }
