@@ -36,7 +36,7 @@ public class MemberService {
     }
     // 로그인
     public Optional<String> login(String email, String password){
-        Optional<Member> loginCheck = memberRepository.findById(email);
+        Optional<Member> loginCheck = memberRepository.findByMemberEmail(email);
         if(loginCheck.isPresent()){
             Member member = loginCheck.get();
             if(member.getMemberPassword().equals(password)) return Optional.of(member.getMemberEmail());
