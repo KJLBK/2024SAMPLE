@@ -11,8 +11,6 @@ import org.hibernate.annotations.ColumnDefault;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -39,19 +37,6 @@ public class Member implements UserDetails {
 	private String phone;
 
 	private LocalDateTime joinDateTime;
-
-	public static Member from(RegisterDto registerDto) {
-		PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
-		return Member.builder()
-				.id(registerDto.getId())
-				.pw(passwordEncoder.encode(registerDto.getPw()))
-				.name(registerDto.getName())
-				.phone(registerDto.getPhone())
-				.role(Role.USER)
-				.joinDateTime(LocalDateTime.now())
-				.build();
-	}
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
