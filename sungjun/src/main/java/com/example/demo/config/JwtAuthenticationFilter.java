@@ -2,7 +2,7 @@ package com.example.demo.config;
 
 import com.example.demo.entity.jwt.TokenInfo;
 import com.example.demo.exception.ErrorCode;
-import com.example.demo.exception.JwtCustomException;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
@@ -10,12 +10,14 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
 
+@Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends GenericFilterBean {
 
@@ -27,23 +29,29 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-		Authentication authentication;
+		String accessToken = resolveToken((HttpServletRequest) request, ACCESS_TOKEN_HEADER_NAME);
+		if (accessToken == null) {
+			chain.doFilter(request, response);
+			return;
+		}
 
-		String token = resolveToken((HttpServletRequest) request, ACCESS_TOKEN_HEADER_NAME);
-		boolean tokenValidResult = jwtUtil.validateToken(token);
+		Claims accessTokenClaims = jwtUtil.getClaims(accessToken);
+
+		boolean tokenValidResult = jwtUtil.validateToken(accessTokenClaims);
 
 		if (tokenValidResult) {
-			authentication = jwtUtil.getAuthentication(token);
+			Authentication AuthenticationByAccessToken = jwtUtil.getAuthentication(accessTokenClaims);
 			SecurityContextHolder.getContext()
-					.setAuthentication(authentication);
+					.setAuthentication(AuthenticationByAccessToken);
 		}
 
 		if (!tokenValidResult) {
 			String refreshToken = resolveToken((HttpServletRequest) request, ACCESS_TOKEN_HEADER_NAME);
+			Claims refreshTokenClaims = jwtUtil.getClaims(refreshToken);
 
-			if (jwtUtil.validateToken(refreshToken)) {
-				authentication = jwtUtil.getAuthentication(refreshToken);
-				TokenInfo tokenInfo = jwtUtil.createToken(authentication);
+			if (jwtUtil.validateToken(refreshTokenClaims)) {
+				Authentication AuthenticationByRefreshToken = jwtUtil.getAuthentication(refreshTokenClaims);
+				TokenInfo tokenInfo = jwtUtil.createToken(AuthenticationByRefreshToken);
 
 				HttpServletResponse httpServletResponse = (HttpServletResponse) response;
 				httpServletResponse.setHeader(ACCESS_TOKEN_HEADER_NAME, AUTHENTICATION_TYPE + tokenInfo);
@@ -59,11 +67,13 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
 		String bearerToken = request.getHeader(headerName);  // 서블릿 헤더에서 Authorization 값 가져오기
 
 		if (bearerToken == null || bearerToken.isEmpty()) {
-			throw new JwtCustomException(ErrorCode.UNVALID_TOKEN_EXCEPTION);
+			log.info(String.valueOf(ErrorCode.NOT_EXISTS_TOKEN_EXCEPTION));
+			return null;
 		}
 
 		if (!bearerToken.startsWith("Bearer")) {
-			throw new JwtCustomException(ErrorCode.NOT_SURPPORTED_TOKEN_EXCEPTION);
+			log.info(String.valueOf(ErrorCode.NOT_SURPPORTED_TOKEN_EXCEPTION));
+			return null;
 		}
 
 		return bearerToken.substring(7);  // bearer을 제외한 토큰 리턴

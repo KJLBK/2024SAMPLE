@@ -14,7 +14,8 @@ public enum ErrorCode {
 	WRONG_SECRET_KEY_EXCEPTION(HttpStatus.BAD_REQUEST, "T001 	", "비밀키가 잘못되었습니다."),
 	EXPIRED_TOKEN_EXCEPTION(HttpStatus.BAD_REQUEST, "T002", "토큰이 만료되었습니다."),
 	UNVALID_TOKEN_EXCEPTION(HttpStatus.BAD_REQUEST, "T003", "유효하지 않은 토큰입니다."),
-	NOT_SURPPORTED_TOKEN_EXCEPTION(HttpStatus.BAD_REQUEST, "T004", "지원되지 않는 토큰입니다.");
+	NOT_SURPPORTED_TOKEN_EXCEPTION(HttpStatus.BAD_REQUEST, "T004", "지원되지 않는 토큰입니다."),
+	NOT_EXISTS_TOKEN_EXCEPTION(HttpStatus.BAD_REQUEST, "T005", "토큰이 존재하지 않습니다.");
 
 	private final HttpStatus status;
 

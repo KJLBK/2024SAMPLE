@@ -2,27 +2,31 @@ package com.example.demo.config;
 
 import com.example.demo.entity.jwt.TokenInfo;
 import com.example.demo.exception.ErrorCode;
-import com.example.demo.exception.JwtCustomException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
+import java.security.Key;
+import java.util.Base64;
 import java.util.Date;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtUtil {
 
 	private static final String ROLE_NAME = "roles";
@@ -32,11 +36,19 @@ public class JwtUtil {
 	@Value("${jwt.secret-key}")
 	private String secretKey;
 
+	private Key key;
+
 	@Value("${jwt.expired-time.access-token}")
 	private long accessTokenExpiredTime;
 
 	@Value("${jwt.expired-time.refresh-token}")
 	private long refreshTokenExpiredTime;
+
+	@PostConstruct
+	private void init() {
+		byte[] decodedKey = Base64.getDecoder().decode(this.secretKey);
+		this.key = Keys.hmacShaKeyFor(decodedKey);
+	}
 
 	public TokenInfo createToken(Authentication authentication) {
 		Claims claims = Jwts.claims()
@@ -51,14 +63,14 @@ public class JwtUtil {
 				.setClaims(claims)
 				.setIssuedAt(now)
 				.setExpiration(accessTokenExpired)
-				.signWith(SignatureAlgorithm.HS256, secretKey)
+				.signWith(key, SignatureAlgorithm.HS256)
 				.compact();
 
 		String refreshToken = Jwts.builder()
 				.setClaims(claims)
 				.setIssuedAt(now)
 				.setExpiration(refreshTokenExpired)
-				.signWith(SignatureAlgorithm.HS256, secretKey)
+				.signWith(key, SignatureAlgorithm.HS256)
 				.compact();
 
 		return TokenInfo.builder()
@@ -67,43 +79,43 @@ public class JwtUtil {
 				.build();
 	}
 
-	public boolean validateToken(String token) {
-		if (token == null || token.isEmpty()) {
+	public boolean validateToken(Claims claims) {
+		if (claims == null) {
 			return false;
 		}
 
-		Claims claims = getClaims(token);
 		return !claims.getExpiration().before(new Date());
 	}
 
-	public Authentication getAuthentication(String token) {
-		UserDetails userDetails = userDetailsService.loadUserByUsername(getMemberId(token));
+	public Authentication getAuthentication(Claims claims) {
+		UserDetails userDetails = userDetailsService.loadUserByUsername(getMemberId(claims));
 
 		return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
 	}
 
-	private String getMemberId(String token) {
-		return getClaims(token).getSubject();
+	private String getMemberId(Claims claims) {
+		return claims.getSubject();
 	}
 
-	private Claims getClaims(String token) {
-		Claims claims;
+	public Claims getClaims(String token) {
+		Claims claims = null;
 
 		try {
-			claims = Jwts.parser()
-					.setSigningKey(secretKey)
+			claims = Jwts.parserBuilder()
+					.setSigningKey(key)
+					.build()
 					.parseClaimsJws(token)
 					.getBody();
 		} catch (SignatureException e) {
-			throw new JwtCustomException(ErrorCode.WRONG_SECRET_KEY_EXCEPTION);
+			log.info(ErrorCode.WRONG_SECRET_KEY_EXCEPTION.getMessage());
 		} catch (ExpiredJwtException e) {
-			throw new JwtCustomException(ErrorCode.EXPIRED_TOKEN_EXCEPTION);
+			log.info(ErrorCode.EXPIRED_TOKEN_EXCEPTION.getMessage());
 		} catch (MalformedJwtException e) {
-			throw new JwtCustomException(ErrorCode.UNVALID_TOKEN_EXCEPTION);
+			log.info(ErrorCode.UNVALID_TOKEN_EXCEPTION.getMessage());
 		} catch (UnsupportedJwtException e) {
-			throw new JwtCustomException(ErrorCode.NOT_SURPPORTED_TOKEN_EXCEPTION);
+			log.info(ErrorCode.NOT_SURPPORTED_TOKEN_EXCEPTION.getMessage());
 		} catch (IllegalArgumentException e) {
-			throw new BadCredentialsException("잘못된 입력값", e);
+			log.info(String.valueOf(e));
 		}
 
 		return claims;

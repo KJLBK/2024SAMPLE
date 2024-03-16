@@ -21,4 +21,9 @@ public class LoginController {
 		return ResponseEntity.ok(tokenInfo);
 	}
 
+	@PostMapping("/test")
+	public String test() {
+		return "test";
+	}
+
 }

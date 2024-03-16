@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
 @Configuration
@@ -19,6 +20,8 @@ public class SecurityConfig {
 
 	@Value("${url.permit.all}")
 	private String PERMIT_ALL_URL;
+
+	private final JwtUtil jwtUtil;
 
 	@Bean
 	public PasswordEncoder passwordEncoder(){
@@ -31,12 +34,14 @@ public class SecurityConfig {
 				.httpBasic(AbstractHttpConfigurer::disable)
 				.csrf(AbstractHttpConfigurer::disable)
 				.cors(cors -> cors.configurationSource(
-						request -> new CorsConfiguration().applyPermitDefaultValues()))
+						request -> new CorsConfiguration()
+								.applyPermitDefaultValues()))
+				.formLogin(AbstractHttpConfigurer::disable)
 				.authorizeHttpRequests(authorize -> authorize
 						.requestMatchers(PERMIT_ALL_URL.split(",")).permitAll()
-						.anyRequest().authenticated()
-				)
-				.formLogin(AbstractHttpConfigurer::disable)
+						.anyRequest().authenticated())
+				.addFilterBefore(new JwtAuthenticationFilter(jwtUtil),
+						UsernamePasswordAuthenticationFilter.class)
 				.build();
 	}
 
