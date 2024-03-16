@@ -43,4 +43,8 @@ public class MemberService {
         }
         return Optional.empty();
     }
+    // 회원탈퇴
+    public void memberDelete(Member member){
+        memberRepository.delete(member);
+    }
 }

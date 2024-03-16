@@ -45,4 +45,10 @@ public class MemberController {
         session.invalidate();
         return "redirect:/";
     }
+    // 회원탈퇴
+    @PostMapping("/members/memberDelete")
+    public String memberDelete(@RequestBody Member member, HttpSession session){
+        memberService.memberDelete(member);
+        return "redirect:/";
+    }
 }
