@@ -17,8 +17,15 @@ public class MemberService {
     // 회원 가입
     public Optional<String> join(Member member){
         duplicationMember(member);
+        passwordLimit(member.getMemberPassword());
         memberRepository.save(member);
         return Optional.ofNullable(member.getMemberEmail());
+    }
+    // 비밀 번호 길이 제한
+    private void passwordLimit(String password){
+        if(password.length() > 15){
+            throw new IllegalStateException("비밀번호 길이가 잘못되었습니다.");
+        }
     }
     // 중복 체크
     private void duplicationMember(Member member){
@@ -29,11 +36,15 @@ public class MemberService {
     }
     // 로그인
     public Optional<String> login(String email, String password){
-        Optional<Member> loginCheck = memberRepository.findById(email);
+        Optional<Member> loginCheck = memberRepository.findByMemberEmail(email);
         if(loginCheck.isPresent()){
             Member member = loginCheck.get();
             if(member.getMemberPassword().equals(password)) return Optional.of(member.getMemberEmail());
         }
         return Optional.empty();
+    }
+    // 회원탈퇴
+    public void memberDelete(Member member){
+        memberRepository.delete(member);
     }
 }

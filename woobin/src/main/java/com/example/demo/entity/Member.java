@@ -12,11 +12,11 @@ import lombok.*;
 @Table(name = "members")
 public class Member {
     @Id
-    @Column(name = "member_email")
+    @Column(name = "member_email", nullable = false)
     private String memberEmail;
-    @Column(name = "member_password")
+    @Column(name = "member_password", nullable = false)
     private String memberPassword;
-    @Column(name = "member_role")
+    @Column(name = "member_role", nullable = false)
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private Role role = Role.USER;
 }

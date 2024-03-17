@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.entity.Member;
 import com.example.demo.service.MemberService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -26,12 +27,28 @@ public class MemberController {
             return "/members/createMember";
         }
     }
+    // 로그인
     @PostMapping("/members/loginMember")
-    public String login(@RequestBody Member member){
+    public String login(@RequestBody Member member, HttpSession session){
         Optional<String> sucess = memberService.login(member.getMemberEmail(), member.getMemberPassword());
-        if(sucess.isPresent()) return "redirect:/";
+        if(sucess.isPresent()){
+            session.setAttribute("userEmail", member.getMemberEmail());
+            return "redirect:/";
+        }
         else {
             return "/members/loginMember";
         }
+    }
+    // 로그아웃
+    @RequestMapping("/members/logoutMember")
+    public String logout(HttpSession session){
+        session.invalidate();
+        return "redirect:/";
+    }
+    // 회원탈퇴
+    @PostMapping("/members/memberDelete")
+    public String memberDelete(@RequestBody Member member, HttpSession session){
+        memberService.memberDelete(member);
+        return "redirect:/";
     }
 }
