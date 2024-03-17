@@ -1,6 +1,5 @@
 package com.example.demo.config;
 
-import com.example.demo.entity.jwt.TokenInfo;
 import com.example.demo.exception.ErrorCode;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -8,7 +7,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -45,19 +43,6 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
 					.setAuthentication(AuthenticationByAccessToken);
 		}
 
-		if (!tokenValidResult) {
-			String refreshToken = resolveToken((HttpServletRequest) request, ACCESS_TOKEN_HEADER_NAME);
-			Claims refreshTokenClaims = jwtUtil.getClaims(refreshToken);
-
-			if (jwtUtil.validateToken(refreshTokenClaims)) {
-				Authentication AuthenticationByRefreshToken = jwtUtil.getAuthentication(refreshTokenClaims);
-				TokenInfo tokenInfo = jwtUtil.createToken(AuthenticationByRefreshToken);
-
-				HttpServletResponse httpServletResponse = (HttpServletResponse) response;
-				httpServletResponse.setHeader(ACCESS_TOKEN_HEADER_NAME, AUTHENTICATION_TYPE + tokenInfo);
-			}
-		}
-
 		chain.doFilter(request, response);
 	}
 
@@ -71,7 +56,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
 			return null;
 		}
 
-		if (!bearerToken.startsWith("Bearer")) {
+		if (!bearerToken.startsWith(AUTHENTICATION_TYPE)) {
 			log.info(String.valueOf(ErrorCode.NOT_SURPPORTED_TOKEN_EXCEPTION));
 			return null;
 		}
